@@ -1,7 +1,23 @@
-# Can you build a working game from zero with just Claude Code?
+<p align="center">
+  <img src="docs/img/logo.png" width="120" alt="Ruana y Pólvora">
+</p>
 
-That was the experiment. Not "can AI write some game code" — the whole thing:
-design, systems, balance, assets, audio, animation, a web build, deployed.
+<h1 align="center">Ruana y Pólvora</h1>
+
+<p align="center">
+  <em>Can you build a working game from zero with just Claude Code?</em>
+</p>
+
+<p align="center">
+  <img src="docs/img/01-hero.png" width="100%" alt="The assassin approaching a royalist patrol at golden hour">
+</p>
+
+---
+
+# The experiment
+
+Not "can AI write some game code" — the whole thing: design, systems, balance,
+assets, audio, animation, a web build, deployed.
 
 **Short answer: yes. You can.** This repository is a playable stealth prototype
 that did not exist a few days ago.
@@ -24,14 +40,17 @@ It exists to answer one design question:
 > Does approaching a patrolling guard from behind and executing him feel *tense*
 > to approach and *satisfying* to pull off?
 
+| | |
+|:--|:--|
+| <img src="docs/img/02-vision-cone.png" width="420"> | **Stay out of the cone.** The guard sees in an arc — and *hears* in every direction. Jogging carries 8 m. Crouching, 0.9 m. |
+| <img src="docs/img/03-assassinate.png" width="420"> | **Get behind him.** A 150° arc, 2.4 m. The lunge closes the rest. |
+| <img src="docs/img/04-tall-grass.png" width="420"> | **Crouch in the tall grass.** No button, no prompt to memorize — the grass breaks his line of sight and crouching drops your eyes below it. |
+
 **Keyboard** — `WASD` move · `Mouse` look · `Shift` jog · `Ctrl`/`C` crouch ·
 `E` assassinate · `R` restart · `Esc` menu · `H` cycle HUD
 
 **Gamepad (Xbox)** — Left stick move · Right stick camera · `RT` jog · `B`
 crouch · `X` assassinate · `View` restart · `Menu` pause
-
-Jogging gives you away. Crouching gets you closer. If you're spotted, run into
-the tall grass and crouch — it breaks his line of sight.
 
 ---
 

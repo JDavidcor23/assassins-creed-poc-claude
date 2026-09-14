@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Logo de Ruana y Polvora.
+       El hexagono es el indicador de deteccion del juego (gris -> amarillo ->
+       rojo). Aca esta a media carga: el instante en que el guardia sospecha
+       pero todavia no te vio. Ese es el momento que el prototipo mide.
+       La hoja oculta lo cruza en diagonal, saliendo del antebrazo.
+       Colores tomados del juego: paja del pastizal y rojo del cono de vision. -->
+  <defs>
+    <linearGradient id="hoja" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8A8F99"/>
+      <stop offset="1" stop-color="#E8EBF0"/>
+    </linearGradient>
+    <linearGradient id="carga" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#C8322A"/>
+      <stop offset="1" stop-color="#E5B733"/>
+    </linearGradient>
+    <clipPath id="hex">
+      <polygon points="64,6 114,35 114,93 64,122 14,93 14,35"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fondo: tierra de la selva a contraluz -->
+  <polygon points="64,6 114,35 114,93 64,122 14,93 14,35" fill="#231B12"/>
+
+  <!-- Relleno de deteccion a media carga, recortado por el hexagono -->
+  <g clip-path="url(#hex)">
+    <rect x="0" y="58" width="128" height="70" fill="url(#carga)" opacity="0.92"/>
+  </g>
+
+  <!-- Contorno del hexagono -->
+  <polygon points="64,6 114,35 114,93 64,122 14,93 14,35"
+           fill="none" stroke="#E5B733" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Hoja oculta: paralela al antebrazo, punta pasando los nudillos -->
+  <g transform="rotate(-34 64 64)">
+    <rect x="60.5" y="30" width="7" height="46" fill="url(#hoja)"/>
+    <polygon points="60.5,30 67.5,30 64,17" fill="#F2F4F7"/>
+    <rect x="57" y="76" width="14" height="10" rx="2" fill="#4A3826"/>
+    <rect x="57" y="86" width="14" height="6" rx="2" fill="#6B4F33"/>
+  </g>
+</svg>

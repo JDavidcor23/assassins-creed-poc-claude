@@ -1,0 +1,16 @@
+# Cache de importacion de Godot: se regenera solo al abrir el proyecto.
+.godot/
+
+# FBX CRUDOS DE MESHY — 169 MB que el juego NO carga.
+# El codigo solo lee de assets/characters/*/mixamo/ (ver player.gd y guard.gd).
+# Estos son los originales de 30K tris sin riggear, mas sus texturas sueltas.
+assets/characters/asesino/asesino.fbx
+assets/characters/asesino/asesino.fbx.import
+assets/characters/realista/realista.fbx
+assets/characters/realista/realista.fbx.import
+assets/characters/asesino/asesino_?.png
+assets/characters/asesino/asesino_?.png.import
+assets/characters/realista/realista_?.png
+assets/characters/realista/realista_?.png.import
+assets/characters/asesino/Meshy_AI_*
+assets/characters/realista/Meshy_AI_*

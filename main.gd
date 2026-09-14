@@ -64,6 +64,8 @@ var _hint: Label
 var _hideouts: Array[Vector3] = []
 var _subs: Label
 var _subs_tween: Tween
+# Pantalla "click to play" (solo web). Null en escritorio.
+var _gate: Control
 # 0 = LIMPIO (sin cartel de controles) — el default, para grabar
 # 1 = COMPLETO (con cartel) — para jugar y depurar
 # 2 = CINE (nada de HUD ni conos de visión) — captura pura
@@ -638,7 +640,83 @@ Jogging gives you away. If spotted, crouch inside the tall grass — it breaks h
 		_audio.said.connect(_on_said)
 
 	_build_menu(layer)
+	_build_start_gate(layer)
 	_apply_hud_mode()
+
+
+# Puerta de entrada SOLO EN WEB. El navegador bloquea dos cosas hasta que el
+# usuario hace un gesto:
+#   - el audio (politica de autoplay: si no, cada pagina te gritaria al abrirla)
+#   - los mandos (la Gamepad API los esconde hasta que se aprieta un boton,
+#     porque un mando identifica tu equipo y sirve para rastrear)
+# Sin esta pantalla el juego PARECE roto: no suena y el mando no responde.
+# En escritorio no hace falta y solo estorbaria.
+func _build_start_gate(layer: CanvasLayer) -> void:
+	if not OS.has_feature("web"):
+		return
+
+	_gate = Control.new()
+	_gate.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_gate.process_mode = Node.PROCESS_MODE_ALWAYS
+	_gate.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.add_child(_gate)
+
+	var fondo := ColorRect.new()
+	fondo.color = Color(0.05, 0.04, 0.03, 0.92)
+	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_gate.add_child(fondo)
+
+	var centro := CenterContainer.new()
+	centro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	centro.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_gate.add_child(centro)
+
+	var caja := VBoxContainer.new()
+	caja.add_theme_constant_override("separation", 22)
+	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	centro.add_child(caja)
+
+	var titulo := Label.new()
+	titulo.text = "RUANA Y PÓLVORA"
+	titulo.add_theme_font_size_override("font_size", 54)
+	titulo.add_theme_color_override("font_color", Color(0.90, 0.72, 0.20))
+	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(titulo)
+
+	var sub := Label.new()
+	sub.text = "a stealth prototype"
+	sub.add_theme_font_size_override("font_size", 19)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.68, 0.60))
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(sub)
+
+	var jugar := Button.new()
+	jugar.text = "  CLICK TO PLAY  "
+	jugar.add_theme_font_size_override("font_size", 30)
+	jugar.custom_minimum_size = Vector2(0.0, 62.0)
+	jugar.pressed.connect(_open_gate)
+	caja.add_child(jugar)
+
+	var aviso := Label.new()
+	aviso.text = "Sound starts after you click — your browser blocks audio until then.
+Using a gamepad? Press any button once the game starts."
+	aviso.add_theme_font_size_override("font_size", 16)
+	aviso.add_theme_color_override("font_color", Color(0.66, 0.62, 0.55))
+	aviso.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(aviso)
+
+	# El mundo queda congelado hasta el clic: si no, el guardia patrulla (y te
+	# detecta) mientras el jugador todavia esta leyendo la pantalla.
+	get_tree().paused = true
+
+
+func _open_gate() -> void:
+	if _gate == null:
+		return
+	_gate.queue_free()
+	_gate = null
+	get_tree().paused = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _on_said(texto: String) -> void:
@@ -824,6 +902,11 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Con la puerta abierta nada mas responde: el menu de pausa encima de la
+	# pantalla de inicio deja el arbol pausado de una forma que no se puede
+	# deshacer.
+	if _gate != null:
+		return
 	if event.is_action_pressed(&"pause"):
 		_toggle_menu()
 	elif event.is_action_pressed(&"restart"):

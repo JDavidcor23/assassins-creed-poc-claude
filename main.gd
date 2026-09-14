@@ -652,7 +652,9 @@ Jogging gives you away. If spotted, crouch inside the tall grass — it breaks h
 # Sin esta pantalla el juego PARECE roto: no suena y el mando no responde.
 # En escritorio no hace falta y solo estorbaria.
 func _build_start_gate(layer: CanvasLayer) -> void:
-	if not OS.has_feature("web"):
+	# `-- --gate` fuerza la pantalla en escritorio para poder MIRARLA sin tener
+	# que desplegar. Sin esto, la unica forma de ver como quedo era subirla.
+	if not OS.has_feature("web") and not OS.get_cmdline_user_args().has("--gate"):
 		return
 
 	_gate = Control.new()
@@ -676,9 +678,31 @@ func _build_start_gate(layer: CanvasLayer) -> void:
 	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	centro.add_child(caja)
 
+	# El aviso va ARRIBA del titulo: tiene que leerse antes que nada. Solo
+	# aparece en web, que es el link publico — la version de escritorio queda
+	# limpia para mostrarla en persona.
+	var aviso_ia := Label.new()
+	aviso_ia.text = "BUILT WITH CLAUDE CODE"
+	aviso_ia.add_theme_font_size_override("font_size", 40)
+	aviso_ia.add_theme_color_override("font_color", Color(0.96, 0.94, 0.90))
+	aviso_ia.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(aviso_ia)
+
+	var aviso_ia2 := Label.new()
+	aviso_ia2.text = "An experiment — not a product, and not a replacement for game developers."
+	aviso_ia2.add_theme_font_size_override("font_size", 21)
+	aviso_ia2.add_theme_color_override("font_color", Color(0.90, 0.72, 0.20))
+	aviso_ia2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caja.add_child(aviso_ia2)
+
+	var linea := ColorRect.new()
+	linea.color = Color(0.45, 0.40, 0.32, 0.8)
+	linea.custom_minimum_size = Vector2(0.0, 2.0)
+	caja.add_child(linea)
+
 	var titulo := Label.new()
 	titulo.text = "RUANA Y PÓLVORA"
-	titulo.add_theme_font_size_override("font_size", 54)
+	titulo.add_theme_font_size_override("font_size", 40)
 	titulo.add_theme_color_override("font_color", Color(0.90, 0.72, 0.20))
 	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	caja.add_child(titulo)

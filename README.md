@@ -123,7 +123,12 @@ A test that asserts something must *fail* is often the one protecting the design
 
 ## This does not replace a game developer
 
-It needs saying plainly.
+It needs saying plainly — and the web build says it before you can even press
+play:
+
+<p align="center">
+  <img src="docs/img/05-start-screen.png" width="100%" alt="Start screen: BUILT WITH CLAUDE CODE — an experiment, not a product, and not a replacement for game developers">
+</p>
 
 A professional wouldn't have shipped the blade 15 metres away, wouldn't have set
 crouch speed to the guard's exact speed, and would have known a vision cone

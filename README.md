@@ -1,94 +1,150 @@
-# Ruana y Pólvora — Stealth Prototype
+# Can you build a working game from zero with just Claude Code?
 
-A concept prototype built in **Godot 4.7** to test one question:
+That was the experiment. Not "can AI write some game code" — the whole thing:
+design, systems, balance, assets, audio, animation, a web build, deployed.
 
-> Does approaching a patrolling guard from behind and executing him feel
-> *tense* to approach and *satisfying* to pull off?
+**Short answer: yes. You can.** This repository is a playable stealth prototype
+that did not exist a few days ago.
 
-Set during the Colombian war of independence: a criollo assassin, a Spanish
-royalist patrol, and a jungle at golden hour.
+**Longer answer: you *can*, but if you want a result that's actually good, don't
+do it with Claude Code alone.** Combining it with specialized tools is what made
+the difference between "a programmer's test scene" and something that looks and
+sounds like a game.
 
-## Play
+---
+
+## What is this
+
+**Ruana y Pólvora** — a stealth prototype set during the Colombian war of
+independence. A criollo assassin, a Spanish royalist patrol, a jungle at golden
+hour. Built in **Godot 4.7**.
+
+It exists to answer one design question:
+
+> Does approaching a patrolling guard from behind and executing him feel *tense*
+> to approach and *satisfying* to pull off?
 
 **Keyboard** — `WASD` move · `Mouse` look · `Shift` jog · `Ctrl`/`C` crouch ·
 `E` assassinate · `R` restart · `Esc` menu · `H` cycle HUD
 
-**Gamepad (Xbox)** — Left stick move · Right stick camera · `RT` jog ·
-`B` crouch · `X` assassinate · `View` restart · `Menu` pause
+**Gamepad (Xbox)** — Left stick move · Right stick camera · `RT` jog · `B`
+crouch · `X` assassinate · `View` restart · `Menu` pause
 
-Jogging gives you away. Crouching gets you closer. If you are spotted, run into
+Jogging gives you away. Crouching gets you closer. If you're spotted, run into
 the tall grass and crouch — it breaks his line of sight.
 
-## The design, in three numbers
+---
 
-Each movement mode has a **role**, enforced by how far the guard can hear you:
+## What Claude Code did on its own
 
-| mode | speed | heard at | role |
-|------|-------|----------|------|
-| crouch | 1.25 m/s | 0.9 m | reaches assassination range unheard — slow but safe |
-| walk | 1.45 m/s | 3.0 m | 1.2 s exposed against a 1.5 s detection window — tight |
-| jog | 3.9 m/s | 8.0 m | always gives you away — for repositioning or escaping |
+Everything that is code and design:
 
-The guard patrols at 0.95 m/s. **Every one of those numbers is load-bearing**:
-when crouch speed was set to 1.25 while the guard also moved at 1.25, closing
-the distance became mathematically impossible. The test suite now asserts the
-game is winnable.
+- Movement, camera, and the whole feel layer
+- The guard's AI: patrol, vision cone, **hearing**, suspicion, alert, hunt,
+  search, and calming back down
+- Stealth balance — the numbers that make each movement mode mean something
+- The assassination sequence: slow-motion windup, hit-stop, camera orbit
+- HUD, detection indicator, pause menu, subtitles, gamepad support
+- Web export pipeline and deployment config
+- Four headless test suites
 
-## Built with AI, verified by hand
+It also used **[Claude Code Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios)**
+— an agent architecture with specialized roles (game designer, gameplay
+programmer, Godot specialist, QA) instead of one generic assistant. Having a
+*technical director* argue with a *game designer* produces better decisions than
+asking one model to be everything at once.
 
-- **Characters** — Meshy (image-to-3D), rigged in Mixamo
-- **Animation** — Mixamo library clips, retargeted at runtime
-- **Voice & SFX** — ElevenLabs (18 clips, Castilian Spanish against the
-  player's criollo — deliberate, and subtitled in English)
-- **Code** — Claude Code
+## Where it needed help — and this is the real lesson
 
-Every AI-generated piece needed measurement to be trusted. A few that only
-showed up because something measured them:
+Claude Code cannot generate a character model, a motion-captured animation, or a
+voice actor. For those, specialized tools did the work:
 
-- The hidden blade spawned **15.4 m away from its own hand** — a
-  `BoneAttachment3D` lives in skeleton space, and the position was never divided
-  by the rig's scale (the mesh scale was).
-- A Mixamo clip downloaded against a different character reported **239 m/s**
-  (863 km/h): it came in that character's units, ~93× off. `rig.gd` now detects
-  and normalizes foreign clips.
-- The guard had **no hearing at all** — only a vision cone. You could sprint at
-  his back and nothing happened.
+| need | tool |
+|------|------|
+| 3D characters | **Meshy** (image-to-3D) |
+| Rigging + animation | **Mixamo** |
+| Voice and sound effects | **ElevenLabs** |
+| Everything else | **Claude Code** |
 
-## Verification
+Without those, this would have been capsules sliding around a grey plane. The
+honest takeaway isn't "AI builds games now" — it's **AI is very good at the
+parts that are logic, and you still need the right tool for the parts that
+aren't.**
 
-Four headless suites, no hardware required:
+---
 
-```bash
-godot --headless --path . --script verify_locomotion.gd   # speeds, foot-sliding, blade
-godot --headless --path . --script verify_detection.gd    # sight, hearing, design invariants
-godot --headless --path . --script verify_gamepad.gd      # input map
-godot --path . --script verify_menu.gd                    # pause menu (needs a window)
-```
+## Why you still need to verify everything
 
-The ones that matter most are **cross-system invariants** — the unit tests were
-all green while the game was unplayable:
+Every AI-generated piece had to be *measured* before it could be trusted. A few
+bugs that only surfaced because something measured them:
+
+- **The hidden blade was 15.4 metres away from its own hand.** A
+  `BoneAttachment3D` lives in skeleton space; the mesh scale was compensated,
+  the position wasn't. You never saw the weapon — your brain filled in a knife
+  that was never there.
+- **An animation clip reported 239 m/s** (863 km/h). It had been downloaded
+  against a different character and came in that character's units, ~93× off.
+- **The guard had no ears.** Only a vision cone. You could sprint at his back
+  and nothing happened.
+- **The game was mathematically unwinnable.** Crouch speed ended up at exactly
+  the guard's patrol speed — closing distance was not hard, it was *impossible*.
+  Every unit test was green.
+
+That last one is the point. Green tests on isolated pieces prove nothing about
+whether the game works. The suite now includes **cross-system invariants**:
 
 - no movement state may out-run the animation clip that sells it
 - crouch and walk must out-pace the guard
 - walking must reach range, but **not for free**
-- jogging must *never* work — otherwise nobody would ever crouch
+- jogging must **never** work — otherwise nobody would ever crouch
 
-## Web build
+A test that asserts something must *fail* is often the one protecting the design.
 
-Web only supports the `gl_compatibility` renderer, so SSAO and volumetric fog
-are unavailable there; `main._compatibility()` detects this at runtime and
-compensates with stronger depth fog and glow.
+---
+
+## This does not replace a game developer
+
+It needs saying plainly.
+
+A professional wouldn't have shipped the blade 15 metres away, wouldn't have set
+crouch speed to the guard's exact speed, and would have known a vision cone
+without hearing is half a stealth system. Every one of those was caught by
+playing it and asking "why does this feel wrong?" — a human judgment call that
+no test wrote for itself.
+
+What AI changed is the **cost of trying**. A prototype like this used to mean
+weeks and a small team. Now one person can ask a design question and have a
+playable answer in days. That's a real shift — but the person still has to know
+what to ask, and has to recognize when the answer is wrong.
+
+This was an experiment. It was also genuinely fun.
+
+---
+
+## Running it
 
 ```bash
-bash build_web.sh      # exports to build/web/
-python serve_web.py    # local test at :8000 WITH the COOP/COEP headers
+godot --path .                                         # play
+bash build_web.sh                                      # export web build
+python serve_web.py                                    # local test at :8000
 ```
 
-`python -m http.server` will **not** work: without cross-origin isolation Godot
-cannot use `SharedArrayBuffer` and boots to a black screen. `vercel.json` ships
-those headers.
+Tests (no hardware needed):
+
+```bash
+godot --headless --path . --script verify_locomotion.gd
+godot --headless --path . --script verify_detection.gd
+godot --headless --path . --script verify_gamepad.gd
+godot --path . --script verify_menu.gd
+```
+
+> On web, only the `gl_compatibility` renderer exists, so SSAO and volumetric fog
+> are unavailable — the game detects this at runtime and compensates. And
+> `python -m http.server` will **not** work: without cross-origin isolation Godot
+> can't use `SharedArrayBuffer` and boots to a black screen. `vercel.json` ships
+> the right headers.
 
 ---
 
 *Throwaway prototype. Standards are deliberately relaxed for speed — this code
-is meant to answer a design question, not to ship.*
+exists to answer a design question, not to ship.*
